@@ -13,9 +13,8 @@
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
-// The entry: one word, 9 characters. "reply-all" is the word every boss
-// reaches for — and the one every employee dreads seeing in their inbox.
-const WORD = "reply-all";
+// The entry: one word, 7 characters. "seagull" is the word for the boss.
+const WORD = "seagull";
 
 // The grader sets MAKEFUN_OUTPUT_DIR=/output; fall back to /output so a
 // local run behaves the same way.
@@ -40,7 +39,7 @@ mkdirSync(OUT_DIR, { recursive: true });
 writeFileSync(OUT_FILE, WORD, "utf8");
 
 // Verify what landed on disk: read it back and confirm text, character
-// count and byte size — 9 ASCII characters, 9 bytes, no trailing newline.
+// count and byte size — 7 ASCII characters, 7 bytes, no trailing newline.
 const written = readFileSync(OUT_FILE, "utf8");
 if (written !== WORD) {
   fail(`verification failed: file holds ${JSON.stringify(written)}`);
