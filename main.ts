@@ -1,24 +1,38 @@
-// One Word For The Boss — entrypoint (reviser rewrite)
-// Writes the single-word entry to /output/entry.txt as UTF-8.
-// Uses only async node:fs/promises with top-level await; no sync APIs.
+// One Word for the Boss — entry program.
+// Emits exactly one word describing the boss to /output/entry.txt (UTF-8).
+// The word: "Autocorrect" — the boss who "fixes" your good work into
+// something worse, just to leave a mark on it.
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 
-const DEFAULT_OUTPUT_PATH = "/output/entry.txt";
-const ENTRY_WORD = "Synergy";
-const ENCODING = "utf8" as const;
+const BOSS_WORD = "Autocorrect";
+const DEFAULT_TARGET = "/output/entry.txt";
+const MAX_CHARS = 30;
 
-function resolveOutputPath(): string {
-  const override = process.env.OUTPUT_PATH?.trim();
-  return override && override.length > 0 ? override : DEFAULT_OUTPUT_PATH;
+// Gate mirror: the sealed scorer accepts only UTF-8 text of 1..30
+// characters that is not only white space; the brief wants one word,
+// so reject any whitespace inside the entry as well.
+function assertEntryWord(word: string): void {
+  const chars = [...word].length;
+  if (chars < 1 || chars > MAX_CHARS) {
+    throw new Error(`entry word must be 1-${MAX_CHARS} characters, got ${chars}`);
+  }
+  if (/\s/u.test(word)) {
+    throw new Error("entry must be a single word with no whitespace");
+  }
 }
 
-async function emitEntry(targetPath: string, word: string): Promise<void> {
-  const parentDir = dirname(targetPath);
-  await mkdir(parentDir, { recursive: true });
-  await writeFile(targetPath, word, { encoding: ENCODING });
+function targetPath(): string {
+  const fromEnv = process.env.OUTPUT_PATH;
+  return fromEnv && fromEnv.trim().length > 0 ? fromEnv : DEFAULT_TARGET;
 }
 
-const outputPath = resolveOutputPath();
-await emitEntry(outputPath, ENTRY_WORD);
+async function writeEntry(word: string): Promise<void> {
+  assertEntryWord(word);
+  const target = targetPath();
+  await mkdir(dirname(target), { recursive: true });
+  await writeFile(target, word, "utf8");
+}
+
+await writeEntry(BOSS_WORD);
